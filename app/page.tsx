@@ -10,6 +10,7 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
+import { pdfApi } from "@/lib/api";
 
 // TypeScript declaration for Google Analytics
 declare global {
@@ -60,13 +61,19 @@ const PDFMergerApp = () => {
     setDragActive(false);
 
     const droppedFiles = Array.from(e.dataTransfer.files);
+    console.log("drooppedFiles", droppedFiles);
+    debugger;
     handleFiles(droppedFiles);
   }, []);
 
   // Handle file input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
+      console.log("selectedFiles", selectedFiles);
+      const uploadedFile = await pdfApi.uploadPDF(selectedFiles[0]);
+      console.log("uploaded file", uploadedFile);
+      debugger;
       handleFiles(selectedFiles);
     }
   };
@@ -141,7 +148,12 @@ const PDFMergerApp = () => {
       alert("Please select at least 2 PDF files to merge");
       return;
     }
-
+    const filesIds = files.map((file) => file.id);
+    console.log("fileIds", filesIds);
+    debugger;
+    // await pdfApi.mergePDFs({
+    //   fileIds: files.map((file) => file.name),
+    // });
     setIsMerging(true);
     setMergeResult(null);
 
