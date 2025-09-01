@@ -210,7 +210,7 @@ const PDFMergerApp = () => {
           total_size: files.reduce((sum, file) => sum + file.size, 0),
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       setMergeResult({
         success: false,
         error: "Failed to merge PDFs. Please try again.",
@@ -231,6 +231,64 @@ const PDFMergerApp = () => {
   const clearFiles = () => {
     setFiles([]);
     setMergeResult(null);
+  };
+
+  // Download merged PDF
+  const downloadMergedPDF = async () => {
+    if (!mergeResult?.filename) {
+      alert("No merged PDF available for download");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+        }/merge/download/${mergeResult.filename}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+      }
+
+      // Get the blob data
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = mergeResult.filename || "merged-document.pdf";
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Track download analytics
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_download_success", {
+          filename: mergeResult.filename,
+          files_merged: files.length,
+        });
+      }
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      alert("Failed to download merged PDF. Please try again.");
+
+      // Track download error analytics
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_download_error", {
+          error: error.message,
+        });
+      }
+    }
   };
 
   return (
@@ -393,7 +451,10 @@ const PDFMergerApp = () => {
                 <p className="text-gray-600 mb-4">
                   Your merged PDF is ready for download
                 </p>
-                <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                <button
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                  onClick={downloadMergedPDF}
+                >
                   <Download className="h-5 w-5 mr-2" />
                   Download Merged PDF
                 </button>
