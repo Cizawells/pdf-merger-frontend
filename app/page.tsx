@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
 import {
+  ArrowDown,
+  ArrowUp,
+  Download,
+  FileText,
+  Loader2,
   Upload,
   X,
-  ArrowUp,
-  ArrowDown,
-  FileText,
-  Download,
-  Loader2,
 } from "lucide-react";
+import React, { useCallback, useState } from "react";
 
 // TypeScript declaration for Google Analytics
 declare global {
@@ -137,6 +137,7 @@ const PDFMergerApp = () => {
 
   // Merge PDFs (with multiple file upload)
   const mergePDFs = async () => {
+    console.log("filess length", files.length);
     if (files.length < 2) {
       alert("Please select at least 2 PDF files to merge");
       return;
@@ -196,11 +197,13 @@ const PDFMergerApp = () => {
       }
 
       const mergeResult = await mergeResponse.json();
+      console.log("merrrge result", mergeResult);
+      debugger;
 
       setMergeResult({
         success: true,
         downloadUrl: mergeResult.downloadUrl,
-        filename: mergeResult.filename,
+        filename: mergeResult.fileName,
       });
 
       // Track analytics (Week 2 requirement)
@@ -235,6 +238,8 @@ const PDFMergerApp = () => {
 
   // Download merged PDF
   const downloadMergedPDF = async () => {
+    console.log("mergeResult", mergeResult);
+    debugger;
     if (!mergeResult?.filename) {
       alert("No merged PDF available for download");
       return;
