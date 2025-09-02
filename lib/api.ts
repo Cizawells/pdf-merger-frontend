@@ -1,8 +1,7 @@
 import axios from "axios";
 import { UploadedFile, MergeRequest, MergeResponse } from "@/types/pdf";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = "http://localhost:5001/api";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -38,7 +37,7 @@ apiClient.interceptors.response.use(
 );
 
 export const pdfApi = {
-  // Upload a single PDF file
+  // Upload a single PDF file (keep for backward compatibility)
   uploadPDF: async (
     file: File,
     onProgress?: (progress: number) => void
@@ -63,6 +62,40 @@ export const pdfApi = {
         },
       }
     );
+
+    return response.data;
+  },
+
+  // NEW: Upload multiple PDF files at once
+  uploadMultiplePDFs: async (
+    files: File[],
+    onProgress?: (progress: number) => void
+  ): Promise<{
+    message: string;
+    files: UploadedFile[];
+    totalFiles: number;
+    totalSize: number;
+  }> => {
+    const formData = new FormData();
+
+    // Append all files with the same field name 'files'
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await apiClient.post("/upload/pdfs", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total && onProgress) {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress(progress);
+        }
+      },
+    });
 
     return response.data;
   },

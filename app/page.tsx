@@ -10,7 +10,6 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
-import { pdfApi } from "@/lib/api";
 
 // TypeScript declaration for Google Analytics
 declare global {
@@ -61,19 +60,13 @@ const PDFMergerApp = () => {
     setDragActive(false);
 
     const droppedFiles = Array.from(e.dataTransfer.files);
-    console.log("drooppedFiles", droppedFiles);
-    debugger;
     handleFiles(droppedFiles);
   }, []);
 
   // Handle file input change
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
-      console.log("selectedFiles", selectedFiles);
-      const uploadedFile = await pdfApi.uploadPDF(selectedFiles[0]);
-      console.log("uploaded file", uploadedFile);
-      debugger;
       handleFiles(selectedFiles);
     }
   };
@@ -142,39 +135,73 @@ const PDFMergerApp = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  // Merge PDFs (simulated backend call)
+  // Merge PDFs (with multiple file upload)
   const mergePDFs = async () => {
     if (files.length < 2) {
       alert("Please select at least 2 PDF files to merge");
       return;
     }
-    const filesIds = files.map((file) => file.id);
-    console.log("fileIds", filesIds);
-    debugger;
-    // await pdfApi.mergePDFs({
-    //   fileIds: files.map((file) => file.name),
-    // });
+
     setIsMerging(true);
     setMergeResult(null);
 
     try {
-      // Simulate API call to backend
+      console.log(`Uploading ${files.length} files...`);
+
+      // Upload all files at once using the new multiple upload endpoint
       const formData = new FormData();
-      files.forEach((pdfFile, index) => {
-        formData.append(`file${index}`, pdfFile.file);
+      files.forEach((pdfFile) => {
+        formData.append("files", pdfFile.file);
       });
 
-      // Simulated backend response (replace with actual API call)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const uploadResponse = await fetch(
+        `${"http://localhost:5001/api"}/upload/pdfs`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      // Mock successful response
-      const mockResponse: MergeResponse = {
-        success: true,
-        downloadUrl: "blob:mock-merged-pdf-url",
-        filename: "merged-document.pdf",
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      console.log("Upload successful:", uploadResult);
+
+      // Now merge the uploaded files
+      const mergeRequest = {
+        fileIds: uploadResult.files.map((f: any) => f.fileId),
+        outputName: "merged-document.pdf",
       };
 
-      setMergeResult(mockResponse);
+      // const data = {
+      //   outputName: "mergepdf.pdf",
+      //   fileIds: files.map((file) => file.id),
+      // };
+
+      const mergeResponse = await fetch(
+        `${"http://localhost:5001/api"}/merge`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mergeRequest),
+        }
+      );
+
+      if (!mergeResponse.ok) {
+        throw new Error(`Merge failed: ${mergeResponse.statusText}`);
+      }
+
+      const mergeResult = await mergeResponse.json();
+
+      setMergeResult({
+        success: true,
+        downloadUrl: mergeResult.downloadUrl,
+        filename: mergeResult.filename,
+      });
 
       // Track analytics (Week 2 requirement)
       if (typeof window !== "undefined" && window.gtag) {
@@ -183,7 +210,7 @@ const PDFMergerApp = () => {
           total_size: files.reduce((sum, file) => sum + file.size, 0),
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       setMergeResult({
         success: false,
         error: "Failed to merge PDFs. Please try again.",
@@ -204,6 +231,64 @@ const PDFMergerApp = () => {
   const clearFiles = () => {
     setFiles([]);
     setMergeResult(null);
+  };
+
+  // Download merged PDF
+  const downloadMergedPDF = async () => {
+    if (!mergeResult?.filename) {
+      alert("No merged PDF available for download");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+        }/merge/download/${mergeResult.filename}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+      }
+
+      // Get the blob data
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = mergeResult.filename || "merged-document.pdf";
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Track download analytics
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_download_success", {
+          filename: mergeResult.filename,
+          files_merged: files.length,
+        });
+      }
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      alert("Failed to download merged PDF. Please try again.");
+
+      // Track download error analytics
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_download_error", {
+          error: error.message,
+        });
+      }
+    }
   };
 
   return (
@@ -366,7 +451,10 @@ const PDFMergerApp = () => {
                 <p className="text-gray-600 mb-4">
                   Your merged PDF is ready for download
                 </p>
-                <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                <button
+                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                  onClick={downloadMergedPDF}
+                >
                   <Download className="h-5 w-5 mr-2" />
                   Download Merged PDF
                 </button>
