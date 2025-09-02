@@ -238,8 +238,6 @@ const PDFMergerApp = () => {
 
   // Download merged PDF
   const downloadMergedPDF = async () => {
-    console.log("mergeResult", mergeResult);
-    debugger;
     if (!mergeResult?.filename) {
       alert("No merged PDF available for download");
       return;
