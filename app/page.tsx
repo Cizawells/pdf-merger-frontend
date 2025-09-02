@@ -156,7 +156,7 @@ const PDFMergerApp = () => {
       });
 
       const uploadResponse = await fetch(
-        `${"http://localhost:5001/api"}/upload/pdfs`,
+        `${process.env.NEXT_PUBLIC_API_URL}/upload/pdfs`,
         {
           method: "POST",
           body: formData,
@@ -182,7 +182,7 @@ const PDFMergerApp = () => {
       // };
 
       const mergeResponse = await fetch(
-        `${"http://localhost:5001/api"}/merge`,
+        `${process.env.NEXT_PUBLIC_API_URL}/merge`,
         {
           method: "POST",
           headers: {
@@ -247,9 +247,7 @@ const PDFMergerApp = () => {
 
     try {
       const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
-        }/merge/download/${mergeResult.filename}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/merge/download/${mergeResult.filename}`,
         {
           method: "GET",
         }
