@@ -268,9 +268,7 @@ const PDFToolsLanding = () => {
                 >
                   <div className="flex flex-col items-center text-center h-full">
                     <div className="mb-4 opacity-90">{tool.icon}</div>
-                    <h3 className="font-semibold text-lg mb-2">
-                      {tool.name} allo
-                    </h3>
+                    <h3 className="font-semibold text-lg mb-2">{tool.name}</h3>
                     <p className="text-sm opacity-90 leading-snug">
                       {tool.description}
                     </p>

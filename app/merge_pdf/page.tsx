@@ -138,9 +138,9 @@ const MergePDFPage = () => {
           // Initial Upload State
           <div className="text-center">
             <div className="mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              {/* <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Plus className="w-10 h-10 text-white" />
-              </div>
+              </div> */}
               <h1 className="text-4xl font-bold text-slate-800 mb-4">
                 Merge PDF Files
               </h1>
