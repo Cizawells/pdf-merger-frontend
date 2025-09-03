@@ -1,39 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
 import {
-  FileText,
-  Upload,
-  Plus,
   ArrowLeft,
-  GripVertical,
-  X,
-  Download,
-  FolderOpen,
-  Cloud,
-  Settings,
-  Info,
   ChevronRight,
+  Cloud,
+  Download,
+  FileText,
+  FolderOpen,
+  GripVertical,
+  Info,
+  Plus,
+  Upload,
+  X,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { UploadFile, useFilesContext } from "../context/context";
 
 const MergePDFPage = () => {
+  const router = useRouter();
+  const { files, setFiles } = useFilesContext();
+  let fileIds = files.map((file) => file.id);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedFile, setDraggedFile] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
-  const handleFileUpload = (files) => {
-    const pdfFiles = Array.from(files).filter(
-      (file) => file.type === "application/pdf"
-    );
-    const newFiles = pdfFiles.map((file, index) => ({
-      id: Date.now() + index,
-      file,
-      name: file.name,
-      size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
-      pages: Math.floor(Math.random() * 50) + 1, // Mock page count
-    }));
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+  const handleFileUpload = (files: File[]) => {
+    const pdfFiles = Array.from(files)
+      .filter((file) => file.type === "application/pdf")
+      .map((file) => ({
+        id: Date.now().toString(),
+        file,
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+        pages: Math.floor(Math.random() * 50) + 1,
+      }));
+
+    setFiles((prev: UploadFile[]) => [...prev, ...pdfFiles]);
   };
 
   const handleDrop = (e) => {
@@ -53,26 +57,28 @@ const MergePDFPage = () => {
     setIsDragOver(false);
   };
 
-  const handleFileInputChange = (e) => {
-    handleFileUpload(e.target.files);
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      handleFileUpload(Array.from(e.target.files));
+    }
   };
 
-  const removeFile = (id) => {
-    setUploadedFiles((files) => files.filter((file) => file.id !== id));
+  const removeFile = (id: string) => {
+    setFiles((files: UploadFile[]) => files.filter((file) => file.id !== id));
   };
 
-  const handleFileDragStart = (e, file) => {
+  const handleFileDragStart = (e: React.DragEvent, file: UploadFile) => {
     setDraggedFile(file);
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleFileDragOver = (e, index) => {
+  const handleFileDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setDragOverIndex(index);
   };
 
-  const handleFileDrop = (e, dropIndex) => {
+  const handleFileDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     if (!draggedFile) return;
 
@@ -100,7 +106,10 @@ const MergePDFPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <button className="text-slate-600 hover:text-slate-900 transition-colors">
+              <button
+                className="text-slate-600 hover:text-slate-900 transition-colors"
+                onClick={() => router.back()}
+              >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center space-x-2">
@@ -134,7 +143,7 @@ const MergePDFPage = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {uploadedFiles.length === 0 ? (
+        {files.length === 0 ? (
           // Initial Upload State
           <div className="text-center">
             <div className="mb-8">
@@ -210,13 +219,13 @@ const MergePDFPage = () => {
                     PDF Files to Merge
                   </h2>
                   <span className="text-sm text-slate-600">
-                    {uploadedFiles.length} files selected
+                    {files.length} files selected
                   </span>
                 </div>
 
                 {/* File List */}
                 <div className="space-y-3">
-                  {uploadedFiles.map((file, index) => (
+                  {files.map((file, index) => (
                     <div
                       key={file.id}
                       draggable

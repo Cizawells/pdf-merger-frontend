@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import AppBar from "@/components/ui/appbar";
+import ToolSelectionModal from "@/components/ui/tool-selection-modal";
 import {
-  FileText,
-  Download,
-  Upload,
-  Scissors,
-  Plus,
-  RotateCw,
-  Lock,
-  Unlock,
-  Image,
-  FileImage,
   Archive,
+  ArrowRight,
   Edit3,
   Eye,
-  ArrowRight,
-  Star,
+  FileImage,
+  FileText,
+  Image,
+  Lock,
+  Plus,
+  RotateCw,
+  Scissors,
   Shield,
-  Zap,
+  Unlock,
+  Upload,
   Users,
+  Zap,
 } from "lucide-react";
-import AppBar from "@/components/ui/appbar";
 import Link from "next/link";
+import { useState } from "react";
+import { useFilesContext } from "./context/context";
 
 const PDFToolsLanding = () => {
+  const { files, setFiles } = useFilesContext();
   const [hoveredTool, setHoveredTool] = useState(null);
   const [showToolSelector, setShowToolSelector] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -147,18 +148,30 @@ const PDFToolsLanding = () => {
     handleFileUpload(files);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  const handleFileInputChange = (e) => {
-    handleFileUpload(e.target.files);
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pdfFiles = Array.from(e.target.files || []).filter(
+      (file) => file.type === "application/pdf"
+    );
+    setFiles(
+      pdfFiles.map((file, index) => ({
+        id: Date.now().toString() + index,
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+        pages: Math.floor(Math.random() * 50) + 1, // Mock page count
+        file,
+      }))
+    );
+    setShowToolSelector(true);
   };
 
   const handleToolSelect = (tool) => {
@@ -285,81 +298,7 @@ const PDFToolsLanding = () => {
 
       {/* Tool Selection Modal */}
       {showToolSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-800 mb-2">
-                    Choose Your Tool
-                  </h3>
-                  <p className="text-slate-600">
-                    {uploadedFiles.length} PDF file
-                    {uploadedFiles.length > 1 ? "s" : ""} uploaded. What would
-                    you like to do?
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowToolSelector(false)}
-                  className="text-slate-400 hover:text-slate-600 text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {pdfTools.slice(0, 9).map((tool) => (
-                  <Link key={tool.id} href={`/${tool.url}`} passHref>
-                    <div
-                      className={`${tool.color} ${tool.hoverColor} text-white p-4 rounded-xl cursor-pointer transform transition-all duration-200 hover:scale-105`}
-                      onClick={() => handleToolSelect(tool)}
-                    >
-                      <div className="flex flex-col items-center text-center">
-                        <div className="mb-3 opacity-90">
-                          {React.cloneElement(tool.icon, {
-                            className: "w-6 h-6",
-                          })}
-                        </div>
-                        <h4 className="font-semibold text-sm mb-1">
-                          {tool.name}
-                        </h4>
-                        <p className="text-xs opacity-90">{tool.description}</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="mt-6 p-4 bg-slate-50 rounded-xl">
-                <h4 className="font-semibold text-slate-800 mb-2">
-                  Popular Choices:
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleToolSelect(pdfTools[0])}
-                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm hover:bg-blue-200 transition-colors"
-                  >
-                    Merge PDFs
-                  </button>
-                  <button
-                    onClick={() => handleToolSelect(pdfTools[2])}
-                    className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm hover:bg-purple-200 transition-colors"
-                  >
-                    Compress
-                  </button>
-                  <button
-                    onClick={() => handleToolSelect(pdfTools[11])}
-                    className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm hover:bg-slate-200 transition-colors"
-                  >
-                    View PDF
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ToolSelectionModal setShowToolSelector={setShowToolSelector} />
       )}
 
       {/* Features Section */}
