@@ -176,11 +176,6 @@ const PDFMergerApp = () => {
         outputName: "merged-document.pdf",
       };
 
-      // const data = {
-      //   outputName: "mergepdf.pdf",
-      //   fileIds: files.map((file) => file.id),
-      // };
-
       const mergeResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/merge`,
         {

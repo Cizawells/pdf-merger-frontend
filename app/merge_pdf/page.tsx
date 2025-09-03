@@ -17,6 +17,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { UploadFile, useFilesContext } from "../context/context";
 
+interface PDFFile {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  preview?: string;
+}
+
+interface MergeResponse {
+  success: boolean;
+  downloadUrl?: string;
+  filename?: string;
+  error?: string;
+}
+
 const MergePDFPage = () => {
   const router = useRouter();
   const { files, setFiles } = useFilesContext();
@@ -25,6 +40,8 @@ const MergePDFPage = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedFile, setDraggedFile] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergeResult, setMergeResult] = useState<MergeResponse | null>(null);
 
   const handleFileUpload = (files: File[]) => {
     const pdfFiles = Array.from(files)
@@ -97,6 +114,95 @@ const MergePDFPage = () => {
   const handleMerge = () => {
     console.log("Merging files:", uploadedFiles);
     // In a real app, this would trigger the merge process
+  };
+
+  const mergePDFs = async () => {
+    console.log("filess length", files.length);
+    if (files.length < 2) {
+      alert("Please select at least 2 PDF files to merge");
+      return;
+    }
+
+    setIsMerging(true);
+    setMergeResult(null);
+
+    try {
+      console.log(`Uploading ${files.length} files...`);
+
+      // Upload all files at once using the new multiple upload endpoint
+      const formData = new FormData();
+      files.forEach((pdfFile) => {
+        formData.append("files", pdfFile.file);
+      });
+
+      const uploadResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/upload/pdfs`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      console.log("Upload successful:", uploadResult);
+
+      // Now merge the uploaded files
+      const mergeRequest = {
+        fileIds: uploadResult.files.map((f: any) => f.fileId),
+        outputName: "merged-document.pdf",
+      };
+
+      const mergeResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/merge`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mergeRequest),
+        }
+      );
+
+      if (!mergeResponse.ok) {
+        throw new Error(`Merge failed: ${mergeResponse.statusText}`);
+      }
+
+      const mergeResult = await mergeResponse.json();
+      console.log("merrrge result", mergeResult);
+      debugger;
+
+      setMergeResult({
+        success: true,
+        downloadUrl: mergeResult.downloadUrl,
+        filename: mergeResult.fileName,
+      });
+
+      // Track analytics (Week 2 requirement)
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_merge_success", {
+          files_count: files.length,
+          total_size: files.reduce((sum, file) => sum + file.size, 0),
+        });
+      }
+    } catch (error: any) {
+      setMergeResult({
+        success: false,
+        error: "Failed to merge PDFs. Please try again.",
+      });
+
+      // Track error analytics
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "pdf_merge_error", {
+          error: error.message,
+        });
+      }
+    } finally {
+      setIsMerging(false);
+    }
   };
 
   return (
@@ -295,7 +401,7 @@ const MergePDFPage = () => {
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-8">
                 {/* Merge Button */}
                 <button
-                  onClick={handleMerge}
+                  onClick={mergePDFs}
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
                 >
                   <Download className="w-5 h-5" />
