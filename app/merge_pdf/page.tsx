@@ -25,29 +25,21 @@ interface PDFFile {
   preview?: string;
 }
 
-interface MergeResponse {
-  success: boolean;
-  downloadUrl?: string;
-  filename?: string;
-  error?: string;
-}
-
 const MergePDFPage = () => {
   const router = useRouter();
-  const { files, setFiles } = useFilesContext();
+  const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
   let fileIds = files.map((file) => file.id);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedFile, setDraggedFile] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [isMerging, setIsMerging] = useState(false);
-  const [mergeResult, setMergeResult] = useState<MergeResponse | null>(null);
 
   const handleFileUpload = (files: File[]) => {
     const pdfFiles = Array.from(files)
       .filter((file) => file.type === "application/pdf")
-      .map((file) => ({
-        id: Date.now().toString(),
+      .map((file, index) => ({
+        id: Date.now().toString() + index,
         file,
         name: file.name,
         size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
@@ -99,14 +91,14 @@ const MergePDFPage = () => {
     e.preventDefault();
     if (!draggedFile) return;
 
-    const dragIndex = uploadedFiles.findIndex((f) => f.id === draggedFile.id);
+    const dragIndex = files.findIndex((f) => f.id === draggedFile.id);
     if (dragIndex === dropIndex) return;
 
-    const newFiles = [...uploadedFiles];
+    const newFiles = [...files];
     const [removed] = newFiles.splice(dragIndex, 1);
     newFiles.splice(dropIndex, 0, removed);
 
-    setUploadedFiles(newFiles);
+    setFiles(newFiles);
     setDraggedFile(null);
     setDragOverIndex(null);
   };
@@ -173,12 +165,13 @@ const MergePDFPage = () => {
 
       const mergeResult = await mergeResponse.json();
       console.log("merrrge result", mergeResult);
+      router.push(`/download/${mergeResult.fileName!}`); // navigate to /dashboard
       debugger;
-
       setMergeResult({
         success: true,
         downloadUrl: mergeResult.downloadUrl,
-        filename: mergeResult.fileName,
+        fileName: mergeResult.fileName,
+        message: "PDFs merged successfully",
       });
 
       // Track analytics (Week 2 requirement)

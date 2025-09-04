@@ -19,7 +19,9 @@ export interface MergeRequest {
 }
 
 export interface MergeResponse {
-  message: string;
-  outputFileName: string;
-  downloadUrl: string;
+  success: boolean;
+  downloadUrl?: string;
+  fileName?: string;
+  error?: string;
+  message?: string;
 }
