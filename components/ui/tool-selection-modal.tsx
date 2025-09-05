@@ -58,6 +58,7 @@ const pdfTools: Tool[] = [
     icon: <FileText className="w-8 h-8" />,
     color: "bg-gradient-to-br from-orange-500 to-orange-600",
     hoverColor: "hover:from-orange-600 hover:to-orange-700",
+    url: "pdf_to_word",
   },
   {
     id: 5,
