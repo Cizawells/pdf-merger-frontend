@@ -20,7 +20,6 @@ const MergeCompleteComponent = ({
   //   onClose,
 }) => {
   const { mergeResult } = useFilesContext();
-  debugger;
 
   const [isDownloading, setIsDownloading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -31,14 +30,6 @@ const MergeCompleteComponent = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // const handleDownload = async () => {
-  //   setIsDownloading(true);
-  //   // Simulate download process
-  //   await new Promise((resolve) => setTimeout(resolve, 2000));
-  //   setIsDownloading(false);
-  //   console.log("Downloading merged PDF...");
-  // };
-  // Download merged PDF
   const handleDownload = async () => {
     if (!mergeResult?.fileName) {
       alert("No merged PDF available for download");
@@ -47,7 +38,7 @@ const MergeCompleteComponent = ({
     setIsDownloading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/merge/download/${mergeResult.fileName}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/download/${mergeResult.fileName}`,
         {
           method: "GET",
         }
@@ -64,7 +55,7 @@ const MergeCompleteComponent = ({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = mergeResult.filename || "merged-document.pdf";
+      link.download = mergeResult.fileName;
 
       // Trigger download
       document.body.appendChild(link);
@@ -185,7 +176,7 @@ const MergeCompleteComponent = ({
             ) : (
               <>
                 <Download className="w-6 h-6" />
-                <span>Download PDF</span>
+                <span>Download File</span>
               </>
             )}
           </button>

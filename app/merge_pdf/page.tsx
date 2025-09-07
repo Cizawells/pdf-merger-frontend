@@ -9,6 +9,7 @@ import {
   FolderOpen,
   GripVertical,
   Info,
+  Loader,
   Plus,
   Upload,
   X,
@@ -397,7 +398,12 @@ const MergePDFPage = () => {
                   onClick={mergePDFs}
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
                 >
-                  <Download className="w-5 h-5" />
+                  {isMerging ? (
+                    <Loader className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Download className="w-5 h-5" />
+                  )}
+
                   <span>Merge PDFs</span>
                 </button>
 
