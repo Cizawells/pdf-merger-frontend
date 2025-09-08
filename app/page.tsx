@@ -48,6 +48,7 @@ const PDFToolsLanding = () => {
       icon: <Scissors className="w-8 h-8" />,
       color: "bg-gradient-to-br from-green-500 to-green-600",
       hoverColor: "hover:from-green-600 hover:to-green-700",
+      url: "pdf_to_split",
     },
     {
       id: 3,
@@ -64,6 +65,7 @@ const PDFToolsLanding = () => {
       icon: <FileText className="w-8 h-8" />,
       color: "bg-gradient-to-br from-orange-500 to-orange-600",
       hoverColor: "hover:from-orange-600 hover:to-orange-700",
+      url: "pdf_to_word",
     },
     {
       id: 5,
