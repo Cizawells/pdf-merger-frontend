@@ -211,10 +211,9 @@ const PDFSplitterApp = () => {
     try {
       // Upload file first
       const formData = new FormData();
-      formData.append("file", file.file);
-
+      formData.append("files", file.file);
       const uploadResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/upload/pdf`,
+        `${process.env.NEXT_PUBLIC_API_URL}/upload/pdfs`,
         {
           method: "POST",
           body: formData,
@@ -226,10 +225,10 @@ const PDFSplitterApp = () => {
       }
 
       const uploadResult = await uploadResponse.json();
-
+      debugger;
       // Prepare split request
       const splitRequest: SplitRequest = {
-        fileId: uploadResult.fileId,
+        fileId: uploadResult.files.map((f: any) => f.fileId)[0],
         splitType: selectedSplitType,
         options: {},
       };
@@ -251,13 +250,18 @@ const PDFSplitterApp = () => {
 
       // Split PDF
       const splitResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/split`,
+        `${process.env.NEXT_PUBLIC_API_URL}/split/pattern`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(splitRequest),
+          body: JSON.stringify({
+            ...splitRequest,
+            splitByPattern: splitRequest.options.pages
+              ? splitRequest.options.pages?.join("")
+              : "1",
+          }),
         }
       );
 
