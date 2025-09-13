@@ -1,8 +1,10 @@
 "use client";
 import {
   ArrowLeft,
+  Cloud,
   Download,
   FileText,
+  FolderOpen,
   Grid3X3,
   Layers,
   Loader2,
@@ -64,6 +66,7 @@ const PDFSplitterApp = () => {
   const [splitResult, setSplitResult] = useState<SplitResponse | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedSplitType, setSelectedSplitType] = useState<string>("pages");
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Split configuration states
   const [pagesPerSplit, setPagesPerSplit] = useState<number>(1);
@@ -121,6 +124,16 @@ const PDFSplitterApp = () => {
       handleFile(droppedFiles[0]);
     }
   }, []);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
 
   // Handle file input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -499,42 +512,90 @@ const PDFSplitterApp = () => {
 
         {/* Upload Area */}
         {!file && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
-                dragActive
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Drop a PDF file here or click to select
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Select a PDF file to split into multiple documents
-              </p>
-
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleInputChange}
-                className="hidden"
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition-colors duration-200"
+          <>
+            <div className="max-w-2xl mx-auto">
+              <div
+                className={`border-2 border-dashed rounded-2xl p-16 transition-all cursor-pointer ${
+                  isDragOver
+                    ? "border-blue-400 bg-blue-50"
+                    : "border-slate-300 hover:border-blue-400 bg-white"
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => document.getElementById("file-input").click()}
               >
-                <Upload className="h-5 w-5 mr-2" />
-                Choose PDF File
-              </label>
+                <Upload
+                  className={`w-16 h-16 mx-auto mb-6 transition-colors ${
+                    isDragOver ? "text-blue-500" : "text-slate-400"
+                  }`}
+                />
+                <h3 className="text-2xl font-semibold text-slate-700 mb-3">
+                  {isDragOver ? "Drop your PDFs here" : "Select PDF files"}
+                </h3>
+                <p className="text-slate-500 mb-6">or drop PDFs here</p>
+                <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold">
+                  Select PDF files
+                </button>
+                <input
+                  id="file-input"
+                  type="file"
+                  multiple
+                  accept=".pdf"
+                  onChange={handleInputChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Upload Options */}
+              <div className="flex justify-center space-x-4 mt-8">
+                <button className="flex items-center space-x-2 px-6 py-3 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                  <Cloud className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700">From Google Drive</span>
+                </button>
+                <button className="flex items-center space-x-2 px-6 py-3 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                  <FolderOpen className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700">From Dropbox</span>
+                </button>
+              </div>
             </div>
-          </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
+                  dragActive
+                    ? "border-purple-500 bg-purple-50"
+                    : "border-gray-300 hover:border-gray-400"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Drop a PDF file here or click to select
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  Select a PDF file to split into multiple documents
+                </p>
+
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleInputChange}
+                  className="hidden"
+                  id="file-input"
+                />
+                <label
+                  htmlFor="file-input"
+                  className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition-colors duration-200"
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  Choose PDF File
+                </label>
+              </div>
+            </div>
+          </>
         )}
 
         {/* File Preview */}
