@@ -17,7 +17,8 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { UploadFile, useFilesContext } from "../context/context";
 
 // TypeScript declarations
 declare global {
@@ -32,7 +33,7 @@ interface PDFFile {
   file: File;
   name: string;
   size: number;
-  totalPages?: number;
+  pages?: number;
   preview?: string;
 }
 
@@ -63,7 +64,8 @@ interface SplitResponse {
 
 const PDFSplitterApp = () => {
   const router = useRouter();
-  const [file, setFile] = useState<PDFFile | null>(null);
+    const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
+  const [file, setFile] = useState<UploadFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSplitting, setIsSplitting] = useState(false);
   const [splitResult, setSplitResult] = useState<SplitResponse | null>(null);
@@ -76,6 +78,12 @@ const PDFSplitterApp = () => {
   const [customRanges, setCustomRanges] = useState<string>("");
   const [extractPages, setExtractPages] = useState<string>("");
   const [maxFileSize, setMaxFileSize] = useState<number>(5000); // KB
+
+  useEffect(() => {
+    if (files) {
+      setFile(files[0] ?? null); // example: take the first file
+    }
+  }, [files]);
 
   const splitOptions: SplitOption[] = [
     {
@@ -154,12 +162,12 @@ const PDFSplitterApp = () => {
     // Simulate getting page count (in real app, you'd get this from backend)
     const mockPageCount = Math.floor(Math.random() * 50) + 5;
 
-    const newFile: PDFFile = {
+    const newFile: UploadFile = {
       id: Math.random().toString(36).substr(2, 9),
       file: selectedFile,
       name: selectedFile.name,
-      size: selectedFile.size,
-      totalPages: mockPageCount,
+      size: selectedFile.size.toString(),
+      pages: mockPageCount,
     };
 
     setFile(newFile);
@@ -187,7 +195,7 @@ const PDFSplitterApp = () => {
 
     switch (selectedSplitType) {
       case "pages":
-        if (pagesPerSplit < 1 || pagesPerSplit >= (file.totalPages || 1)) {
+        if (pagesPerSplit < 1 || pagesPerSplit >= (file.pages || 1)) {
           return "Pages per split must be between 1 and total pages";
         }
         break;
@@ -295,7 +303,7 @@ const PDFSplitterApp = () => {
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_split_success", {
           split_type: selectedSplitType,
-          total_pages: file.totalPages,
+          total_pages: file.pages,
           file_size: file.size,
           output_files: splitResult.files?.length || 0,
         });
@@ -374,7 +382,7 @@ const PDFSplitterApp = () => {
               <input
                 type="number"
                 min="1"
-                max={file?.totalPages || 1}
+                max={file?.pages || 1}
                 value={pagesPerSplit}
                 onChange={(e) =>
                   setPagesPerSplit(parseInt(e.target.value) || 1)
@@ -553,9 +561,9 @@ const PDFSplitterApp = () => {
                       {file.name}
                     </h3>
                     <div className="flex items-center space-x-4 text-sm text-slate-600">
-                      <span>{formatFileSize(file.size)}</span>
+                      <span>{formatFileSize(parseInt(file.size))}</span>
                       <span>•</span>
-                      <span>{file.totalPages} pages</span>
+                      <span>{file.pages} pages</span>
                     </div>
                   </div>
                 </div>
@@ -683,7 +691,7 @@ const PDFSplitterApp = () => {
                 <button
                   onClick={splitPDF}
                   disabled={isSplitting}
-                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
+                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
                 >
                   {isSplitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
