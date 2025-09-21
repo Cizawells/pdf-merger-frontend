@@ -68,8 +68,8 @@ const MergeCompleteComponent = ({
       // Track download analytics
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_download_success", {
-          filename: mergeResult.filename,
-          files_merged: files.length,
+          filename: mergeResult.fileName,
+          files_merged: 1,
         });
       }
     } catch (error: any) {
