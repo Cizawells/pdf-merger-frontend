@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { UploadFile, useFilesContext } from "../context/context";
+import toast from "react-hot-toast";
 
 // TypeScript declarations
 declare global {
@@ -60,11 +61,12 @@ interface SplitResponse {
   success: boolean;
   files?: { name: string; downloadUrl: string }[];
   error?: string;
+  fileName: string;
 }
 
 const PDFSplitterApp = () => {
   const router = useRouter();
-    const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
+  const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
   const [file, setFile] = useState<UploadFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSplitting, setIsSplitting] = useState(false);
@@ -248,6 +250,8 @@ const PDFSplitterApp = () => {
       }
 
       const uploadResult = await uploadResponse.json();
+      console.log("uploadddd REsultttt", uploadResult);
+      debugger;
 
       // Prepare split request
       const splitRequest: SplitRequest = {
@@ -297,6 +301,7 @@ const PDFSplitterApp = () => {
       setSplitResult({
         success: true,
         files: splitResult.files || [],
+        fileName: splitResult.fileName || null,
       });
 
       // Track analytics
@@ -309,10 +314,7 @@ const PDFSplitterApp = () => {
         });
       }
     } catch (error: any) {
-      setSplitResult({
-        success: false,
-        error: "Failed to split PDF. Please try again.",
-      });
+      setSplitResult(null);
 
       // Track error analytics
       if (typeof window !== "undefined" && window.gtag) {
@@ -329,7 +331,7 @@ const PDFSplitterApp = () => {
   const downloadFile = async (fileName: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/split/download/${fileName}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/download/${fileName}`,
         { method: "GET" }
       );
 
@@ -361,13 +363,14 @@ const PDFSplitterApp = () => {
 
   // Download all files
   const downloadAllFiles = async () => {
+    if (!splitResult) toast.error("no file to download");
     if (!splitResult?.files) return;
 
-    for (const file of splitResult.files) {
-      await downloadFile(file.name);
-      // Small delay between downloads
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
+    // for (const file of splitResult.files) {
+    await downloadFile(splitResult.fileName);
+    // Small delay between downloads
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    // }
   };
 
   const renderSplitConfiguration = () => {
@@ -691,7 +694,7 @@ const PDFSplitterApp = () => {
                 <button
                   onClick={splitPDF}
                   disabled={isSplitting}
-                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
                 >
                   {isSplitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
