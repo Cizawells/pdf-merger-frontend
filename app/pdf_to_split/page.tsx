@@ -329,7 +329,7 @@ const PDFSplitterApp = () => {
   const downloadFile = async (fileName: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/split/download/${fileName}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/download/${fileName}`,
         { method: "GET" }
       );
 
