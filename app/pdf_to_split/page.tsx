@@ -1,15 +1,20 @@
 "use client";
+import Header from "@/components/ui/header";
 import {
   ArrowLeft,
+  Cloud,
   Download,
   FileText,
+  FolderOpen,
   Grid3X3,
+  Info,
   Layers,
   Loader2,
   Plus,
   Scissors,
   Settings,
   Upload,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
@@ -64,13 +69,13 @@ const PDFSplitterApp = () => {
   const [splitResult, setSplitResult] = useState<SplitResponse | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedSplitType, setSelectedSplitType] = useState<string>("pages");
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Split configuration states
   const [pagesPerSplit, setPagesPerSplit] = useState<number>(1);
   const [customRanges, setCustomRanges] = useState<string>("");
   const [extractPages, setExtractPages] = useState<string>("");
   const [maxFileSize, setMaxFileSize] = useState<number>(5000); // KB
-  const [showPreview, setShowPreview] = useState(false);
 
   const splitOptions: SplitOption[] = [
     {
@@ -121,6 +126,16 @@ const PDFSplitterApp = () => {
       handleFile(droppedFiles[0]);
     }
   }, []);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
 
   // Handle file input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,7 +240,7 @@ const PDFSplitterApp = () => {
       }
 
       const uploadResult = await uploadResponse.json();
-      debugger;
+
       // Prepare split request
       const splitRequest: SplitRequest = {
         fileId: uploadResult.files.map((f: any) => f.fileId)[0],
@@ -353,7 +368,7 @@ const PDFSplitterApp = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Pages per split
               </label>
               <input
@@ -364,9 +379,9 @@ const PDFSplitterApp = () => {
                 onChange={(e) =>
                   setPagesPerSplit(parseInt(e.target.value) || 1)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Split every {pagesPerSplit} page(s) into separate files
               </p>
             </div>
@@ -377,7 +392,7 @@ const PDFSplitterApp = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Page Ranges
               </label>
               <input
@@ -385,9 +400,9 @@ const PDFSplitterApp = () => {
                 placeholder="e.g., 1-5, 6-10, 11-15"
                 value={customRanges}
                 onChange={(e) => setCustomRanges(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Specify page ranges separated by commas (e.g., 1-5, 8-12)
               </p>
             </div>
@@ -398,7 +413,7 @@ const PDFSplitterApp = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Pages to Extract
               </label>
               <input
@@ -406,9 +421,9 @@ const PDFSplitterApp = () => {
                 placeholder="e.g., 1, 3, 5-7, 10"
                 value={extractPages}
                 onChange={(e) => setExtractPages(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Specify individual pages or ranges (e.g., 1, 3, 5-7, 10)
               </p>
             </div>
@@ -419,7 +434,7 @@ const PDFSplitterApp = () => {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Maximum File Size (KB)
               </label>
               <input
@@ -429,9 +444,9 @@ const PDFSplitterApp = () => {
                 onChange={(e) =>
                   setMaxFileSize(parseInt(e.target.value) || 5000)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Split into files no larger than{" "}
                 {formatFileSize(maxFileSize * 1024)}
               </p>
@@ -446,346 +461,294 @@ const PDFSplitterApp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <button
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-slate-800">
-                  PDF To Word
-                </span>
-              </div>
-            </div>
-            <nav className="hidden md:flex space-x-6">
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                All Tools
-              </a>
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Help
-              </a>
-            </nav>
-            <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
-              Premium
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header title="Split PDF" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Scissors className="h-12 w-12 text-purple-600 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-800">PDF Splitter</h1>
-          </div>
-          <p className="text-gray-600">
-            Split your PDF into multiple files with advanced customization
-            options
-          </p>
-        </div>
-
-        {/* Upload Area */}
-        {!file && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
-                dragActive
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Drop a PDF file here or click to select
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Select a PDF file to split into multiple documents
+        {!file ? (
+          // Initial Upload State
+          <div className="text-center">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-slate-800 mb-4">
+                Split PDF Files
+              </h1>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
+                Split your PDF document into multiple files. Choose from various
+                splitting options like page ranges, file size limits, or extract
+                specific pages.
               </p>
-
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleInputChange}
-                className="hidden"
-                id="file-input"
-              />
-              <label
-                htmlFor="file-input"
-                className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition-colors duration-200"
-              >
-                <Upload className="h-5 w-5 mr-2" />
-                Choose PDF File
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* File Preview */}
-        {file && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-700">
-                Selected File
-              </h3>
-              <button
-                onClick={removeFile}
-                className="text-red-600 hover:text-red-700 font-medium"
-              >
-                Remove File
-              </button>
             </div>
 
-            <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-              <FileText className="h-8 w-8 text-red-600 mr-3" />
-              <div className="flex-1">
-                <p className="font-medium text-gray-700">{file.name}</p>
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>{formatFileSize(file.size)}</span>
-                  <span>•</span>
-                  <span>{file.totalPages} pages</span>
-                </div>
+            {/* Upload Area */}
+            <div className="max-w-2xl mx-auto">
+              <div
+                className={`border-2 border-dashed rounded-2xl p-16 transition-all cursor-pointer ${
+                  isDragOver
+                    ? "border-blue-400 bg-blue-50"
+                    : "border-slate-300 hover:border-blue-400 bg-white"
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => document.getElementById("file-input").click()}
+              >
+                <Upload
+                  className={`w-16 h-16 mx-auto mb-6 transition-colors ${
+                    isDragOver ? "text-blue-500" : "text-slate-400"
+                  }`}
+                />
+                <h3 className="text-2xl font-semibold text-slate-700 mb-3">
+                  {isDragOver ? "Drop your PDF here" : "Select PDF file"}
+                </h3>
+                <p className="text-slate-500 mb-6">or drop PDF here</p>
+                <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold">
+                  Select PDF file
+                </button>
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleInputChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Upload Options */}
+              <div className="flex justify-center space-x-4 mt-8">
+                <button className="flex items-center space-x-2 px-6 py-3 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                  <Cloud className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700">From Google Drive</span>
+                </button>
+                <button className="flex items-center space-x-2 px-6 py-3 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                  <FolderOpen className="w-5 h-5 text-slate-600" />
+                  <span className="text-slate-700">From Dropbox</span>
+                </button>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Split Options */}
-        {file && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-6">
-              Split Options
-            </h3>
-
-            {/* Option Tabs */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {splitOptions.map((option) => (
-                <button
-                  key={option.type}
-                  onClick={() => setSelectedSplitType(option.type)}
-                  className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                    selectedSplitType === option.type
-                      ? "border-purple-500 bg-purple-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center mb-2">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        selectedSplitType === option.type
-                          ? "bg-purple-500 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {option.icon}
-                    </div>
-                  </div>
-                  <h4 className="font-semibold text-gray-800 mb-1">
-                    {option.label}
-                  </h4>
-                  <p className="text-sm text-gray-600">{option.description}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Configuration Panel */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="font-semibold text-gray-700 mb-4">
-                {
-                  splitOptions.find((opt) => opt.type === selectedSplitType)
-                    ?.label
-                }{" "}
-                Configuration
-              </h4>
-              {renderSplitConfiguration()}
-            </div>
-          </div>
-        )}
-
-        {/* Split Button */}
-        {file && (
-          <div className="text-center mb-6">
-            <button
-              onClick={splitPDF}
-              disabled={isSplitting}
-              className="inline-flex items-center px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-lg"
-            >
-              {isSplitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Splitting PDF...
-                </>
-              ) : (
-                <>
-                  <Scissors className="h-5 w-5 mr-2" />
-                  Split PDF
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Results */}
-        {splitResult && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            {splitResult.success ? (
-              <div>
-                <div className="text-center mb-6">
-                  <div className="text-green-600 mb-4">
-                    <svg
-                      className="mx-auto h-16 w-16"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    PDF Split Successfully!
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Your PDF has been split into{" "}
-                    {splitResult.files?.length || 0} file(s)
-                  </p>
+        ) : (
+          // Files Uploaded State
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* File Preview Area */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-slate-800">
+                    Selected PDF
+                  </h2>
                   <button
-                    onClick={downloadAllFiles}
-                    className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200 mr-4"
+                    onClick={removeFile}
+                    className="text-red-600 hover:text-red-700 font-medium flex items-center space-x-1"
                   >
-                    <Download className="h-5 w-5 mr-2" />
-                    Download All Files
+                    <X className="w-4 h-4" />
+                    <span>Remove</span>
                   </button>
                 </div>
 
-                {/* Individual File Downloads */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-700">
-                    Individual Downloads:
-                  </h4>
-                  {splitResult.files?.map((file, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-red-600 mr-3" />
-                        <span className="font-medium text-gray-700">
-                          {file.name}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => downloadFile(file.name)}
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </button>
+                <div className="flex items-center p-4 bg-slate-50 rounded-xl border-2 border-transparent">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                    <FileText className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-slate-800 truncate max-w-xs">
+                      {file.name}
+                    </h3>
+                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                      <span>{formatFileSize(file.size)}</span>
+                      <span>•</span>
+                      <span>{file.totalPages} pages</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Split Options */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 className="text-xl font-bold text-slate-800 mb-6">
+                  Choose Split Method
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  {splitOptions.map((option) => (
+                    <button
+                      key={option.type}
+                      onClick={() => setSelectedSplitType(option.type)}
+                      className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                        selectedSplitType === option.type
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-slate-200 hover:border-slate-300 bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center mb-3">
+                        <div
+                          className={`p-2 rounded-lg mr-3 ${
+                            selectedSplitType === option.type
+                              ? "bg-blue-500 text-white"
+                              : "bg-slate-200 text-slate-600"
+                          }`}
+                        >
+                          {option.icon}
+                        </div>
+                        <h4 className="font-semibold text-slate-800">
+                          {option.label}
+                        </h4>
+                      </div>
+                      <p className="text-sm text-slate-600">
+                        {option.description}
+                      </p>
+                    </button>
                   ))}
                 </div>
               </div>
-            ) : (
-              <div className="text-center">
-                <div className="text-red-600 mb-4">
-                  <svg
-                    className="mx-auto h-16 w-16"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  Split Failed
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  {splitResult.error ||
-                    "An error occurred while splitting the PDF"}
-                </p>
-                <button
-                  onClick={() => setSplitResult(null)}
-                  className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors duration-200"
-                >
-                  Try Again
-                </button>
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Instructions */}
-        {!file && (
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              How to Split PDFs
-            </h3>
-            <div className="grid md:grid-cols-4 gap-6 text-sm text-gray-600">
-              <div>
-                <div className="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                  <Upload className="h-6 w-6 text-purple-600" />
+              {/* Results Section */}
+              {splitResult && (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mt-6">
+                  {splitResult.success ? (
+                    <div>
+                      <div className="text-center mb-6">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Download className="w-8 h-8 text-green-600" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-800 mb-2">
+                          PDF Split Successfully!
+                        </h3>
+                        <p className="text-slate-600 mb-6">
+                          Your PDF has been split into{" "}
+                          {splitResult.files?.length || 0} file(s)
+                        </p>
+                        <button
+                          onClick={downloadAllFiles}
+                          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2 mx-auto"
+                        >
+                          <Download className="w-5 h-5" />
+                          <span>Download All Files</span>
+                        </button>
+                      </div>
+
+                      {/* Individual File Downloads */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-slate-800 mb-4">
+                          Individual Downloads:
+                        </h4>
+                        {splitResult.files?.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-4 bg-slate-50 rounded-xl"
+                          >
+                            <div className="flex items-center">
+                              <FileText className="w-5 h-5 text-red-600 mr-3" />
+                              <span className="font-medium text-slate-700">
+                                {file.name}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => downloadFile(file.name)}
+                              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center space-x-2"
+                            >
+                              <Download className="w-4 h-4" />
+                              <span>Download</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <X className="w-8 h-8 text-red-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-2">
+                        Split Failed
+                      </h3>
+                      <p className="text-slate-600 mb-6">
+                        {splitResult.error ||
+                          "An error occurred while splitting the PDF"}
+                      </p>
+                      <button
+                        onClick={() => setSplitResult(null)}
+                        className="bg-slate-500 text-white px-6 py-3 rounded-xl hover:bg-slate-600 transition-all duration-200 font-semibold"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <h4 className="font-semibold mb-2">1. Upload PDF</h4>
-                <p>Select or drag and drop your PDF file</p>
-              </div>
-              <div>
-                <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                  <Settings className="h-6 w-6 text-blue-600" />
+              )}
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-8">
+                {/* Split Button */}
+                <button
+                  onClick={splitPDF}
+                  disabled={isSplitting}
+                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
+                >
+                  {isSplitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Scissors className="w-5 h-5" />
+                  )}
+                  <span>{isSplitting ? "Splitting PDF..." : "Split PDF"}</span>
+                </button>
+
+                {/* Configuration Panel */}
+                <div className="space-y-6 mb-6">
+                  <h3 className="font-semibold text-slate-800">
+                    Split Configuration
+                  </h3>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    {renderSplitConfiguration()}
+                  </div>
                 </div>
-                <h4 className="font-semibold mb-2">2. Choose Split Type</h4>
-                <p>Select how you want to split your PDF</p>
-              </div>
-              <div>
-                <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                  <Scissors className="h-6 w-6 text-green-600" />
+
+                {/* Upload Sources */}
+                <div className="space-y-3 mb-6">
+                  <h3 className="font-semibold text-slate-800">
+                    Upload new file
+                  </h3>
+                  <button
+                    onClick={() =>
+                      document.getElementById("file-input-new").click()
+                    }
+                    className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4 text-slate-600" />
+                      <span className="text-sm text-slate-700">
+                        Select New File
+                      </span>
+                    </div>
+                  </button>
+                  <input
+                    id="file-input-new"
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleInputChange}
+                    className="hidden"
+                  />
                 </div>
-                <h4 className="font-semibold mb-2">3. Configure Options</h4>
-                <p>Set your preferred split parameters</p>
-              </div>
-              <div>
-                <div className="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                  <Download className="h-6 w-6 text-orange-600" />
+
+                {/* Info */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex space-x-3">
+                    <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-blue-900 mb-1">
+                        How it works
+                      </h4>
+                      <p className="text-sm text-blue-800">
+                        Choose your split method and configure the options. Your
+                        PDF will be divided according to your specifications.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h4 className="font-semibold mb-2">4. Download Files</h4>
-                <p>Download your split PDF files individually or all at once</p>
               </div>
             </div>
           </div>
         )}
-
-        {/* Google Analytics Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'GA_MEASUREMENT_ID');
-          `,
-          }}
-        />
       </div>
     </div>
   );

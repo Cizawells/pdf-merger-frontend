@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { UploadFile, useFilesContext } from "../context/context";
+import Header from "@/components/ui/header";
 
 interface PDFFile {
   id: string;
@@ -202,45 +203,7 @@ const MergePDFPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <button
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-slate-800">
-                  Merge PDF
-                </span>
-              </div>
-            </div>
-            <nav className="hidden md:flex space-x-6">
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                All Tools
-              </a>
-              <a
-                href="#"
-                className="text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Help
-              </a>
-            </nav>
-            <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200">
-              Premium
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header title="PDF Merge" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {files.length === 0 ? (
@@ -396,6 +359,7 @@ const MergePDFPage = () => {
                 {/* Merge Button */}
                 <button
                   onClick={mergePDFs}
+                  disabled={isMerging}
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold text-lg mb-6 flex items-center justify-center space-x-2"
                 >
                   {isMerging ? (
@@ -404,7 +368,7 @@ const MergePDFPage = () => {
                     <Download className="w-5 h-5" />
                   )}
 
-                  <span>Merge PDFs</span>
+                  <span>{isMerging ? "Merging PDFs" : "Merge PDFs"}</span>
                 </button>
 
                 {/* Options */}
