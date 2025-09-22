@@ -87,7 +87,7 @@ const MergeCompleteComponent = ({
     }
   };
 
-  const handleSaveToCloud = (service) => {
+  const handleSaveToCloud = (service:  File) => {
     console.log(`Saving to ${service}...`);
     // In real app: integrate with cloud service APIs
   };
