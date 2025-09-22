@@ -27,7 +27,7 @@ interface PDFFile {
 
 const PdfToWordPage = () => {
   const router = useRouter();
-  const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
+  const { files, setFiles, setProcessingResult } = useFilesContext();
   let fileIds = files.map((file) => file.id);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -119,7 +119,7 @@ const PdfToWordPage = () => {
     }
 
     setIsMerging(true);
-    setMergeResult(null);
+    setProcessingResult(null);
 
     try {
       console.log(`Uploading ${files.length} files...`);
@@ -170,7 +170,7 @@ const PdfToWordPage = () => {
       console.log("merrrge result", mergeResult);
       router.push(`/download/${mergeResult.fileName!}`); // navigate to /dashboard
       debugger;
-      setMergeResult({
+      setProcessingResult({
         success: true,
         downloadUrl: mergeResult.downloadUrl,
         fileName: mergeResult.fileName,
@@ -181,11 +181,14 @@ const PdfToWordPage = () => {
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_merge_success", {
           files_count: files.length,
-          total_size: files.reduce((sum, file) => sum + parseFloat(file.size.replace(' MB', '')), 0),
+          total_size: files.reduce(
+            (sum, file) => sum + parseFloat(file.size.replace(" MB", "")),
+            0
+          ),
         });
       }
     } catch (error: any) {
-      setMergeResult({
+      setProcessingResult({
         success: false,
         error: "Failed to merge PDFs. Please try again.",
       });
@@ -463,7 +466,8 @@ const PdfToWordPage = () => {
                   </button>
                   <button
                     onClick={() =>
-                      document.getElementById("file-input-additional")?.click()                    }
+                      document.getElementById("file-input-additional")?.click()
+                    }
                     className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                   >
                     <div className="flex items-center space-x-2">
