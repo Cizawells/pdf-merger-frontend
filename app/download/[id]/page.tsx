@@ -19,7 +19,7 @@ const MergeCompleteComponent = ({
   //   onStartOver,
   //   onClose,
 }) => {
-  const { mergeResult } = useFilesContext();
+  const { processingResult } = useFilesContext();
 
   const [isDownloading, setIsDownloading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -31,14 +31,14 @@ const MergeCompleteComponent = ({
   }, []);
 
   const handleDownload = async () => {
-    if (!mergeResult?.fileName) {
+    if (!processingResult?.fileName) {
       alert("No merged PDF available for download");
       return;
     }
     setIsDownloading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/download/${mergeResult.fileName}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/download/${processingResult.fileName}`,
         {
           method: "GET",
         }
@@ -55,7 +55,7 @@ const MergeCompleteComponent = ({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = mergeResult.fileName;
+      link.download = processingResult.fileName;
 
       // Trigger download
       document.body.appendChild(link);
@@ -68,7 +68,7 @@ const MergeCompleteComponent = ({
       // Track download analytics
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_download_success", {
-          filename: mergeResult.fileName,
+          filename: processingResult.fileName,
           files_merged: 1,
         });
       }
@@ -87,7 +87,7 @@ const MergeCompleteComponent = ({
     }
   };
 
-  const handleSaveToCloud = (service:  string) => {
+  const handleSaveToCloud = (service: string) => {
     console.log(`Saving to ${service}...`);
     // In real app: integrate with cloud service APIs
   };
@@ -147,7 +147,7 @@ const MergeCompleteComponent = ({
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-slate-800 text-lg">
-                  {mergeResult?.fileName}
+                  {processingResult?.fileName}
                 </h3>
                 <p className="text-slate-600">Ready for download</p>
               </div>

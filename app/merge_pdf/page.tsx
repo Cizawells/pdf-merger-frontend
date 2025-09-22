@@ -29,8 +29,8 @@ interface PDFFile {
 
 const MergePDFPage = () => {
   const router = useRouter();
-  const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
-  let fileIds = files.map((file) => file.id);   
+  const { files, setFiles, setProcessingResult } = useFilesContext();
+  let fileIds = files.map((file) => file.id);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedFile, setDraggedFile] = useState<UploadFile | null>(null);
@@ -120,7 +120,7 @@ const MergePDFPage = () => {
     }
 
     setIsMerging(true);
-    setMergeResult(null);
+    setProcessingResult(null);
 
     try {
       console.log(`Uploading ${files.length} files...`);
@@ -171,7 +171,7 @@ const MergePDFPage = () => {
       console.log("merrrge result", mergeResult);
       router.push(`/download/${mergeResult.fileName!}`); // navigate to /dashboard
       debugger;
-      setMergeResult({
+      setProcessingResult({
         success: true,
         downloadUrl: mergeResult.downloadUrl,
         fileName: mergeResult.fileName,
@@ -184,13 +184,13 @@ const MergePDFPage = () => {
           files_count: files.length,
           total_size: files.reduce((sum, file) => {
             // Parse the numeric part from the size string (e.g., "2.45 MB" -> 2.45)
-            const sizeValue = parseFloat(file.size.replace(' MB', ''));
+            const sizeValue = parseFloat(file.size.replace(" MB", ""));
             return sum + sizeValue;
           }, 0),
         });
       }
     } catch (error: any) {
-      setMergeResult({
+      setProcessingResult({
         success: false,
         error: "Failed to merge PDFs. Please try again.",
       });

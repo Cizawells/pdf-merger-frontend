@@ -1,7 +1,7 @@
 // app/context/UserContext.tsx
 "use client";
 
-import { MergeResponse } from "@/types/pdf";
+import { DownloadResponse } from "@/types/pdf";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 export type UploadFile = {
@@ -15,19 +15,23 @@ export type UploadFile = {
 type FilesContextType = {
   files: UploadFile[];
   setFiles: React.Dispatch<React.SetStateAction<UploadFile[]>>;
-  mergeResult: MergeResponse | null;
-  setMergeResult: React.Dispatch<React.SetStateAction<MergeResponse | null>>;
+  processingResult: DownloadResponse | null;
+  setProcessingResult: React.Dispatch<
+    React.SetStateAction<DownloadResponse | null>
+  >;
 };
 
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
 
 export function FilesProvider({ children }: { children: ReactNode }) {
   const [files, setFiles] = useState<UploadFile[]>([]);
-  const [mergeResult, setMergeResult] = useState<MergeResponse | null>(null);
+  const [processingResult, setProcessingResult] =
+    useState<DownloadResponse | null>(null);
+  const [splitResult, setSplitResult] = useState<DownloadResponse | null>(null);
 
   return (
     <FilesContext.Provider
-      value={{ files, setFiles, mergeResult, setMergeResult }}
+      value={{ files, setFiles, processingResult, setProcessingResult }}
     >
       {children}
     </FilesContext.Provider>

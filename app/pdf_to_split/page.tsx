@@ -67,7 +67,7 @@ interface SplitResponse {
 
 const PDFSplitterApp = () => {
   const router = useRouter();
-  const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
+  const { files, setFiles, setProcessingResult } = useFilesContext();
   const [file, setFile] = useState<UploadFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSplitting, setIsSplitting] = useState(false);
@@ -300,11 +300,13 @@ const PDFSplitterApp = () => {
       const splitResult = await splitResponse.json();
       console.log("splittt response", splitResponse);
       debugger;
-      setSplitResult({
+      setProcessingResult({
         success: true,
-        files: splitResult.files || [],
+        downloadUrl: splitResult.downloadUrl,
         fileName: splitResult.fileName,
+        message: "PDFs merged successfully",
       });
+      router.push(`/download/${splitResult.fileName!}`); // navigate to /dashboard
 
       // Track analytics
       if (typeof window !== "undefined" && window.gtag) {

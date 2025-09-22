@@ -18,7 +18,7 @@ export interface MergeRequest {
   outputName?: string;
 }
 
-export interface MergeResponse {
+export interface DownloadResponse {
   success: boolean;
   downloadUrl?: string;
   fileName?: string;
