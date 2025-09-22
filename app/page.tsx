@@ -26,9 +26,9 @@ import { useFilesContext } from "./context/context";
 
 const PDFToolsLanding = () => {
   const { files, setFiles } = useFilesContext();
-  const [hoveredTool, setHoveredTool] = useState(null);
+  const [hoveredTool, setHoveredTool] = useState<number | null>(null);
   const [showToolSelector, setShowToolSelector] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
 
   const pdfTools = [
@@ -133,7 +133,7 @@ const PDFToolsLanding = () => {
     },
   ];
 
-  const handleFileUpload = (files) => {
+  const handleFileUpload = (files: File []) => {
     const pdfFiles = Array.from(files).filter(
       (file) => file.type === "application/pdf"
     );
@@ -143,11 +143,11 @@ const PDFToolsLanding = () => {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     const files = e.dataTransfer.files;
-    handleFileUpload(files);
+    handleFileUpload(Array.from(files));
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -176,12 +176,7 @@ const PDFToolsLanding = () => {
     setShowToolSelector(true);
   };
 
-  const handleToolSelect = (tool) => {
-    // Here you would navigate to the specific tool page with the uploaded files
-    console.log(`Selected tool: ${tool.name} for files:`, uploadedFiles);
-    setShowToolSelector(false);
-    // In a real app: router.push(`/tools/${tool.id}?files=${uploadedFiles}`)
-  };
+
 
   const features = [
     {
@@ -233,7 +228,7 @@ const PDFToolsLanding = () => {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              onClick={() => document.getElementById("file-input").click()}
+              onClick={() => document.getElementById("file-input")?.click()}
             >
               <Upload
                 className={`w-12 h-12 mx-auto mb-4 transition-colors ${
