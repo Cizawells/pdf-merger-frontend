@@ -489,7 +489,7 @@ const PDFSplitterApp = () => {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onClick={() => document.getElementById("file-input").click()}
+                onClick={() => document.getElementById("file-input")?.click()}
               >
                 <Upload
                   className={`w-16 h-16 mx-auto mb-6 transition-colors ${
@@ -710,7 +710,7 @@ const PDFSplitterApp = () => {
                   </h3>
                   <button
                     onClick={() =>
-                      document.getElementById("file-input-new").click()
+                      document.getElementById("file-input-new")?.click()
                     }
                     className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                   >
