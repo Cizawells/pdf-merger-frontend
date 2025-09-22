@@ -17,6 +17,12 @@ const MergeCompleteComponent = ({
   originalFilesCount = 3,
   onStartOver,
   onClose,
+}: {
+  mergedFileName: string;
+  originalFilesCount: number;
+  onStartOver: () => void;
+  onClose: () => void;
+
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -35,7 +41,7 @@ const MergeCompleteComponent = ({
     console.log("Downloading merged PDF...");
   };
 
-  const handleSaveToCloud = (service) => {
+  const handleSaveToCloud = (service: string) => {
     console.log(`Saving to ${service}...`);
     // In real app: integrate with cloud service APIs
   };
