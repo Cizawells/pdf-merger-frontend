@@ -32,7 +32,7 @@ const PdfToWordPage = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [draggedFile, setDraggedFile] = useState<UploadFile | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isMerging, setIsMerging] = useState(false);
 
   const handleFileUpload = (files: File[]) => {
@@ -181,7 +181,7 @@ const PdfToWordPage = () => {
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_merge_success", {
           files_count: files.length,
-          total_size: files.reduce((sum, file) => sum + file.size, 0),
+          total_size: files.reduce((sum, file) => sum + parseFloat(file.size.replace(' MB', '')), 0),
         });
       }
     } catch (error: any) {
@@ -273,7 +273,7 @@ const PdfToWordPage = () => {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onClick={() => document.getElementById("file-input").click()}
+                onClick={() => document.getElementById("file-input")?.click()}
               >
                 <Upload
                   className={`w-16 h-16 mx-auto mb-6 transition-colors ${
@@ -373,7 +373,7 @@ const PdfToWordPage = () => {
                 <div className="mt-6 pt-6 border-t border-slate-200">
                   <button
                     onClick={() =>
-                      document.getElementById("file-input-additional").click()
+                      document.getElementById("file-input-additional")?.click()
                     }
                     className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
                   >
@@ -463,8 +463,7 @@ const PdfToWordPage = () => {
                   </button>
                   <button
                     onClick={() =>
-                      document.getElementById("file-input-additional").click()
-                    }
+                      document.getElementById("file-input-additional")?.click()                    }
                     className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                   >
                     <div className="flex items-center space-x-2">
