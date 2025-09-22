@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { UploadFile, useFilesContext } from "../context/context";
 import Header from "@/components/ui/header";
 
@@ -30,12 +30,14 @@ interface PDFFile {
 const MergePDFPage = () => {
   const router = useRouter();
   const { files, setFiles, mergeResult, setMergeResult } = useFilesContext();
-  let fileIds = files.map((file) => file.id);
+  let fileIds = files.map((file) => file.id);   
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [draggedFile, setDraggedFile] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [draggedFile, setDraggedFile] = useState<UploadFile | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isMerging, setIsMerging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputAdditionalRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (files: File[]) => {
     const pdfFiles = Array.from(files)
@@ -51,19 +53,19 @@ const MergePDFPage = () => {
     setFiles((prev: UploadFile[]) => [...prev, ...pdfFiles]);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     const files = e.dataTransfer.files;
-    handleFileUpload(files);
+    handleFileUpload(Array.from(files));
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   };
@@ -180,7 +182,11 @@ const MergePDFPage = () => {
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_merge_success", {
           files_count: files.length,
-          total_size: files.reduce((sum, file) => sum + file.size, 0),
+          total_size: files.reduce((sum, file) => {
+            // Parse the numeric part from the size string (e.g., "2.45 MB" -> 2.45)
+            const sizeValue = parseFloat(file.size.replace(' MB', ''));
+            return sum + sizeValue;
+          }, 0),
         });
       }
     } catch (error: any) {
@@ -234,7 +240,7 @@ const MergePDFPage = () => {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onClick={() => document.getElementById("file-input").click()}
+                onClick={() => fileInputRef.current?.click()}
               >
                 <Upload
                   className={`w-16 h-16 mx-auto mb-6 transition-colors ${
@@ -254,6 +260,7 @@ const MergePDFPage = () => {
                   multiple
                   accept=".pdf"
                   onChange={handleFileInputChange}
+                  ref={fileInputRef}
                   className="hidden"
                 />
               </div>
@@ -333,9 +340,7 @@ const MergePDFPage = () => {
                 {/* Add More Files Button */}
                 <div className="mt-6 pt-6 border-t border-slate-200">
                   <button
-                    onClick={() =>
-                      document.getElementById("file-input-additional").click()
-                    }
+                    onClick={() => fileInputAdditionalRef.current?.click()}
                     className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
                   >
                     <Plus className="w-5 h-5" />
@@ -347,6 +352,7 @@ const MergePDFPage = () => {
                     multiple
                     accept=".pdf"
                     onChange={handleFileInputChange}
+                    ref={fileInputAdditionalRef}
                     className="hidden"
                   />
                 </div>
@@ -429,9 +435,7 @@ const MergePDFPage = () => {
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                   </button>
                   <button
-                    onClick={() =>
-                      document.getElementById("file-input-additional").click()
-                    }
+                    onClick={() => fileInputAdditionalRef.current?.click()}
                     className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
                   >
                     <div className="flex items-center space-x-2">
