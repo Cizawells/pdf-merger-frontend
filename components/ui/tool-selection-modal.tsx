@@ -176,7 +176,7 @@ const ToolSelectionModal = ({
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="mb-3 opacity-90">
-                    {React.cloneElement(tool.icon, {
+                    {React.cloneElement(tool.icon as React.ReactElement<any>, {
                       className: "w-6 h-6",
                     })}
                   </div>
