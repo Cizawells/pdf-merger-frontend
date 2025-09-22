@@ -1,5 +1,6 @@
 "use client";
 import { useFilesContext } from "@/app/context/context";
+import AppBar from "@/components/ui/appbar";
 import {
   Check,
   Clock,
@@ -103,7 +104,8 @@ const MergeCompleteComponent = ({
   };
 
   return (
-    <div className="min-h-[600px] flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <AppBar />
       <div className="text-center max-w-2xl mx-auto">
         {/* Success Animation */}
         <div

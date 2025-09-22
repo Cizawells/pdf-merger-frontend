@@ -168,15 +168,13 @@ const MergePDFPage = () => {
       }
 
       const mergeResult = await mergeResponse.json();
-      console.log("merrrge result", mergeResult);
-      router.push(`/download/${mergeResult.fileName!}`); // navigate to /dashboard
-      debugger;
       setProcessingResult({
         success: true,
         downloadUrl: mergeResult.downloadUrl,
         fileName: mergeResult.fileName,
         message: "PDFs merged successfully",
       });
+      router.push(`/download/${mergeResult.fileName!}`); // navigate to /dashboard
 
       // Track analytics (Week 2 requirement)
       if (typeof window !== "undefined" && window.gtag) {
