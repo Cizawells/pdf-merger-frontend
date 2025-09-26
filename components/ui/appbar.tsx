@@ -44,7 +44,11 @@ const AppBar = () => {
               Contact
             </a>
           </nav>
-          <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200">
+          <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200"
+          onClick={() => {
+            router.push(`/auth/signup`);
+          }}
+          >
             Get Started
           </button>
         </div>
